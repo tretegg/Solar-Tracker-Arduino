@@ -1,12 +1,17 @@
 #include <Arduino.h>
-#include <Stepper.h>
 
 // Change this to the number of steps on your motor 
 #define STEPS 100
 
-// Create TWO stepper instances for Pan (Left/Right) and Tilt (Up/Down)
-Stepper panMotor(STEPS, 8, 9, 10, 11);
-Stepper tiltMotor(STEPS, 4, 5, 6, 7); 
+// CNC Shield pin definitions for the A4988 stepper drivers
+// X header
+const int stepX = 2; // Step pin for Pan
+const int dirX = 5;  // Direction pin for Pan
+// Y header
+const int stepY = 3; // Step pin for Tilt
+const int dirY = 6;  // Direction pin for Tilt
+
+const int enablePin = 8; // Enabled pin (shared)
 
 // Define the analog pins for the 4 photoresistors
 const int PIN_TOP_LEFT = A0;
@@ -23,46 +28,54 @@ const int TOLERANCE = 50;
 void setup() {
   Serial.begin(115200); // Start serial communication for debugging
 
-  // Set the speed of the stepper motors (RPM)
-  panMotor.setSpeed(30);
-  tiltMotor.setSpeed(30);
+  // Set all motor pins as outputs
+  // Outputs power to the motors instead of expecting input from them
+  pinMode(stepX, OUTPUT);
+  pinMode(dirX, OUTPUT);
+  pinMode(stepY, OUTPUT);
+  pinMode(dirY, OUTPUT);
+  
+  // The Enable pin MUST be LOW to power the motors
+  // LOW = outputs enabled, motor coils driven
+  // HIGH = outputs disabled, motor coils off
+  pinMode(enablePin, OUTPUT);
+  digitalWrite(enablePin, LOW);
+}
+
+// Function to move a motor exactly one step
+void moveStep(int stepPin, int dirPin, bool direction) {
+  // HIGH (true) = clockwise, LOW (false) = counterclockwise
+  
+  // Set direction
+  digitalWrite(dirPin, direction);
+
+  // Step the motor
+  digitalWrite(stepPin, HIGH);
+  delayMicroseconds(1000);
+  digitalWrite(stepPin, LOW);
+  delayMicroseconds(1000);
 }
 
 void loop() {
-  // Read the raw analog values
-  valTL = analogRead(PIN_TOP_LEFT);
-  valTR = analogRead(PIN_TOP_RIGHT);
-  valBL = analogRead(PIN_BOTTOM_LEFT);
-  valBR = analogRead(PIN_BOTTOM_RIGHT);
+  int valTL = analogRead(PIN_TOP_LEFT);
+  int valTR = analogRead(PIN_TOP_RIGHT);
+  int valBL = analogRead(PIN_BOTTOM_LEFT);
+  int valBR = analogRead(PIN_BOTTOM_RIGHT);
 
-  // Calculate the averages for each half of the sensor array
   int avgTop = (valTL + valTR) / 2;
   int avgBottom = (valBL + valBR) / 2;
   int avgLeft = (valTL + valBL) / 2;
   int avgRight = (valTR + valBR) / 2;
 
-  // Determine Tilt (Up/Down)
-  int diffVertical = avgTop - avgBottom;
-  
-  if (abs(diffVertical) > TOLERANCE) {
-    if (avgTop > avgBottom) {
-      tiltMotor.step(1); // Move Up
-    } else {
-      tiltMotor.step(-1); // Move Down
-    }
+  // Vertical Movement (Tilt)
+  if (abs(avgTop - avgBottom) > TOLERANCE) {
+    moveStep(stepY, dirY, (avgTop > avgBottom)); 
   }
 
-  // Determine Pan (Left/Right)
-  int diffHorizontal = avgLeft - avgRight;
-  
-  if (abs(diffHorizontal) > TOLERANCE) {
-    if (avgLeft > avgRight) {
-      panMotor.step(1); // Move Left
-    } else {
-      panMotor.step(-1); // Move Right
-    }
+  // Horizontal Movement (Pan)
+  if (abs(avgLeft - avgRight) > TOLERANCE) {
+    moveStep(stepX, dirX, (avgLeft > avgRight));
   }
 
-  // Wait 100ms before next reading
-  delay(100);
+  delay(50); // Small delay for stability
 }
