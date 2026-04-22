@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 // Change this to the number of steps on your motor 
-#define STEPS 100
+#define STEPS 200
 
 // CNC Shield pin definitions for the A4988 stepper drivers
 // X header
