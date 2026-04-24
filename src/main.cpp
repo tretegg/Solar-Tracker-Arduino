@@ -80,7 +80,7 @@ void loop() {
     
     // If we are in manual mode, parse the movement command
     else if (!isAutoMode) {
-      // Look for the colons to split the string (e.g., "azimuth:forward:10")
+      // Look for the colons to split the string (e.g., "azimuth:clockwise:10")
       int firstColon = command.indexOf(':');
       int secondColon = command.lastIndexOf(':');
 
