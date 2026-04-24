@@ -1,7 +1,8 @@
 # Solar Tracker
 
 This project uses an Arduino Uno to move a solar panel so it follows the sun. It uses four light sensors to find the brightest spot in the sky.
-Hardware
+
+## Hardware
 
 Board: Arduino Uno.
 
@@ -21,13 +22,10 @@ Enable Pin: Pin 8 (must be LOW to run motors).
 
 ## Light Sensors:
 
-        Top Left: A0.
-
-        Top Right: A1.
-
-        Bottom Left: A2.
-
-        Bottom Right: A3.
+Top Left: A0.
+Top Right: A1.
+Bottom Left: A2.
+Bottom Right: A3.
 
 ## How it Works
 
@@ -41,6 +39,8 @@ In this mode, the Arduino reads the four light sensors. It compares the light on
 
 In this mode, the Arduino waits for you to send commands through a USB cable. You can tell the motors exactly which way to turn and how many steps to take.
 Commands
+
+### Commands
 
 You can send these text commands to the Arduino using a serial monitor at 115200 speed:
 
