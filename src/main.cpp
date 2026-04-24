@@ -60,6 +60,20 @@ void moveStep(int stepPin, int dirPin, bool direction) {
   delayMicroseconds(1000);
 }
 
+void sendStatus() {
+  int valTL = analogRead(PIN_TOP_LEFT);
+  int valTR = analogRead(PIN_TOP_RIGHT);
+  int valBL = analogRead(PIN_BOTTOM_LEFT);
+  int valBR = analogRead(PIN_BOTTOM_RIGHT);
+
+  // Manually construct the JSON response
+  Serial.print("{\"ldr_top_left\": "); Serial.print(valTL);
+  Serial.print(", \"ldr_bottom_right\": "); Serial.print(valBR);
+  Serial.print(", \"ldr_bottom_left\": "); Serial.print(valBL);
+  Serial.print(", \"ldr_top_right\": "); Serial.print(valTR);
+  Serial.println("}"); // println adds the '\n' so Python knows it's finished
+}
+
 void loop() {
   // Checks if there is a command over USB
   if (Serial.available() > 0) {
@@ -77,6 +91,11 @@ void loop() {
       isAutoMode = false;
       Serial.println("Switched to manual mode");
     } 
+
+    // Status command to send current sensor readings back to API
+    else if (command.equalsIgnoreCase("STATUS")) {
+      sendStatus();
+    }
     
     // If we are in manual mode, parse the movement command
     else if (!isAutoMode) {
