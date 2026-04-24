@@ -25,6 +25,10 @@ int valTL, valTR, valBL, valBR;
 // Tolerance prevents the motors from jittering if the light difference is tiny
 const int TOLERANCE = 50; 
 
+// true = uses LDRs to track automatically
+// false = waits for manual commands over USB
+bool isAutoMode = false;
+
 void setup() {
   Serial.begin(115200); // Start serial communication for debugging
 
@@ -57,25 +61,74 @@ void moveStep(int stepPin, int dirPin, bool direction) {
 }
 
 void loop() {
-  int valTL = analogRead(PIN_TOP_LEFT);
-  int valTR = analogRead(PIN_TOP_RIGHT);
-  int valBL = analogRead(PIN_BOTTOM_LEFT);
-  int valBR = analogRead(PIN_BOTTOM_RIGHT);
+  // Checks if there is a command over USB
+  if (Serial.available() > 0) {
+    // Read the incoming command until the newline character
+    // Also converts the incoming bytes into a String
+    String command = Serial.readStringUntil('\n');
 
-  int avgTop = (valTL + valTR) / 2;
-  int avgBottom = (valBL + valBR) / 2;
-  int avgLeft = (valTL + valBL) / 2;
-  int avgRight = (valTR + valBR) / 2;
+    command.trim(); // Remove any leading/trailing whitespace
 
-  // Vertical Movement (Tilt)
-  if (abs(avgTop - avgBottom) > TOLERANCE) {
-    moveStep(stepY, dirY, (avgTop > avgBottom)); 
+    // Mode switching commands
+    if (command.equalsIgnoreCase("MODE:AUTO")) {
+      isAutoMode = true;
+      Serial.println("Switched to auto mode");
+    } else if (command.equalsIgnoreCase("MODE:MANUAL")) {
+      isAutoMode = false;
+      Serial.println("Switched to manual mode");
+    } 
+    // If we are in manual mode, parse the movement command
+    else if (!isAutoMode) {
+      // Look for the colons to split the string (e.g., "azimuth:forward:10")
+      int firstColon = command.indexOf(':');
+      int secondColon = command.lastIndexOf(':');
+
+      // Extract the direction and distance
+      String axis = command.substring(0, firstColon);
+      String distanceStr = command.substring(firstColon + 1, secondColon);
+      int numSteps = distanceStr.toInt();
+
+      // Convert the direction to a boolean (clockwise = true, counterclockwise = false)
+      bool direction = (distanceStr == "forward");
+
+      // Move the appropriate motor based on the axis
+      if (axis == "azimuth") {
+        for (int i = 0; i < numSteps; i++) {
+          moveStep(stepX, dirX, direction);
+        }
+      } else if (axis == "elevation") {
+        for (int i = 0; i < numSteps; i++) {
+          moveStep(stepY, dirY, direction);
+        }
+      } else {
+        Serial.println("Invalid command format. Use: azimuth:forward:10 or elevation:backward:5");
+      }
+    }
   }
 
-  // Horizontal Movement (Pan)
-  if (abs(avgLeft - avgRight) > TOLERANCE) {
-    moveStep(stepX, dirX, (avgLeft > avgRight));
-  }
 
-  delay(50); // Small delay for stability
+
+  if (isAutoMode) {
+    int valTL = analogRead(PIN_TOP_LEFT);
+    int valTR = analogRead(PIN_TOP_RIGHT);
+    int valBL = analogRead(PIN_BOTTOM_LEFT);
+    int valBR = analogRead(PIN_BOTTOM_RIGHT);
+
+    int avgTop = (valTL + valTR) / 2;
+    int avgBottom = (valBL + valBR) / 2;
+    int avgLeft = (valTL + valBL) / 2;
+    int avgRight = (valTR + valBR) / 2;
+
+    // Vertical Movement (Tilt)
+    if (abs(avgTop - avgBottom) > TOLERANCE) {
+      moveStep(stepY, dirY, (avgTop > avgBottom)); 
+    }
+
+    // Horizontal Movement (Pan)
+    if (abs(avgLeft - avgRight) > TOLERANCE) {
+      moveStep(stepX, dirX, (avgLeft > avgRight));
+    }
+
+    delay(50); // Small delay for stability
+  }
 }
