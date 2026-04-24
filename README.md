@@ -45,7 +45,7 @@ Commands
 
 ### Commands
 
-You can send these text commands to the Arduino using a serial monitor at 115200 speed:
+You can send these text commands to the Arduino using a serial monitor at 115200 baudrate:
 
 MODE:AUTO: Turns on the light-following mode.
 
