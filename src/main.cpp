@@ -65,7 +65,7 @@ void loop() {
   if (Serial.available() > 0) {
     // Read the incoming command until the newline character
     // Also converts the incoming bytes into a String
-    String command = Serial.readStringUntil('\n');
+    string command = Serial.readStringUntil('\n');
 
     command.trim(); // Remove any leading/trailing whitespace
 
@@ -85,12 +85,12 @@ void loop() {
       int secondColon = command.lastIndexOf(':');
 
       // Extract the direction and distance
-      String axis = command.substring(0, firstColon);
-      String distanceStr = command.substring(firstColon + 1, secondColon);
-      int numSteps = distanceStr.toInt();
+      string axis = command.substring(0, firstColon);
+      string directionStr = command.substring(firstColon + 1, secondColon);
+      int numSteps = command.substring(secondColon + 1).toInt();
 
       // Convert the direction to a boolean (clockwise = true, counterclockwise = false)
-      bool direction = (distanceStr == "forward");
+      bool direction = (directionStr == "clockwise");
 
       // Move the appropriate motor based on the axis
       if (axis == "azimuth") {
