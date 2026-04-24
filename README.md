@@ -23,8 +23,11 @@ Enable Pin: Pin 8 (must be LOW to run motors).
 ## Light Sensors:
 
 Top Left: A0.
+
 Top Right: A1.
+
 Bottom Left: A2.
+
 Bottom Right: A3.
 
 ## How it Works
