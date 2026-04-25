@@ -30,7 +30,7 @@ const int TOLERANCE = 50;
 bool isAutoMode = false;
 
 void setup() {
-  Serial.begin(115200); // Start serial communication for debugging
+  Serial.begin(9600); // Start serial communication for debugging
 
   // Set all motor pins as outputs
   // Outputs power to the motors instead of expecting input from them
@@ -72,14 +72,14 @@ void sendStatus() {
   Serial.print(", \"ldr_bottom_left\": "); Serial.print(valBL);
   Serial.print(", \"ldr_top_right\": "); Serial.print(valTR);
   Serial.println("}"); // println adds the '\n' so Python knows it's finished
-}
+} 
 
 void loop() {
   // Checks if there is a command over USB
   if (Serial.available() > 0) {
     // Read the incoming command until the newline character
     // Also converts the incoming bytes into a String
-    string command = Serial.readStringUntil('\n');
+    String command = Serial.readStringUntil('\n');
 
     command.trim(); // Remove any leading/trailing whitespace
 
@@ -104,8 +104,8 @@ void loop() {
       int secondColon = command.lastIndexOf(':');
 
       // Extract the direction and distance
-      string axis = command.substring(0, firstColon);
-      string directionStr = command.substring(firstColon + 1, secondColon);
+      String axis = command.substring(0, firstColon);
+      String directionStr = command.substring(firstColon + 1, secondColon);
       int numSteps = command.substring(secondColon + 1).toInt();
 
       // Convert the direction to a boolean (clockwise = true, counterclockwise = false)
