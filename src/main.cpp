@@ -30,7 +30,7 @@ const int TOLERANCE = 50;
 bool isAutoMode = false;
 
 void setup() {
-  Serial.begin(9600); // Start serial communication for debugging
+  Serial.begin(115200); // Start serial communication for debugging
 
   // Set all motor pins as outputs
   // Outputs power to the motors instead of expecting input from them
