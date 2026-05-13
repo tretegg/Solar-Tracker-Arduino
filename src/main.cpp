@@ -3,6 +3,14 @@
 // Change this to the number of steps on your motor 
 #define STEPS 200
 
+// X-Axis: Step D2, Dir D5
+
+// Y-Axis: Step D3, Dir D6
+// 
+// Z-Axis: Step D4, Dir D7
+// 
+// A-Axis: Step D12, Dir D13
+
 // CNC Shield pin definitions for the A4988 stepper drivers
 // X header
 const int stepX = 2; // Step pin for Pan
